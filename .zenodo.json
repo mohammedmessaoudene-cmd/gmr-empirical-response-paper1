@@ -1,0 +1,27 @@
+{
+  "title": "Empirical Response Exponents and Geometric-Medium Information in Galaxy Rotation Curves",
+  "upload_type": "publication",
+  "publication_type": "preprint",
+  "description": "Public manuscript archive for an empirical response-framework analysis of galaxy rotation curves and residual geometry at fixed baryonic acceleration. The archive contains the manuscript PDF, LaTeX source, bibliography, and figures. It does not redistribute raw SPARC, LITTLE THINGS, THINGS, or author-supplied component tables.",
+  "creators": [
+    {
+      "name": "Messaoudene, Mohammed",
+      "orcid": "0009-0007-4665-2548",
+      "affiliation": "Faculty of Sciences, Belhadj Bouchaib University of Ain Temouchent, Algeria"
+    }
+  ],
+  "access_right": "open",
+  "license": "cc-by-4.0",
+  "version": "0.1.0",
+  "keywords": [
+    "galaxy rotation curves",
+    "radial acceleration relation",
+    "baryonic Tully-Fisher relation",
+    "SPARC",
+    "LITTLE THINGS",
+    "THINGS",
+    "geometric response",
+    "dark matter phenomenology"
+  ],
+  "notes": "This is an empirical manuscript archive. It does not claim a completed self-consistent physical theory or redistribute restricted source tables."
+}
