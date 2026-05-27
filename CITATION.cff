@@ -5,7 +5,7 @@ authors:
   - family-names: "Messaoudene"
     given-names: "Mohammed"
     orcid: "https://orcid.org/0009-0007-4665-2548"
-version: "0.1.1"
+version: "0.1.2"
 date-released: "2026-05-27"
 license: "CC-BY-4.0"
 repository-code: "https://github.com/mohammedmessaoudene-cmd/gmr-empirical-response-paper1"
