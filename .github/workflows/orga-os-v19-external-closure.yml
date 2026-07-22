@@ -1,0 +1,103 @@
+name: ORGA-OS V19 External Closure
+
+on:
+  push:
+    branches:
+      - 'agent/orga-os-v19-external-closure'
+    paths:
+      - 'experiments/orga-os-v19/**'
+      - '.github/workflows/orga-os-v19-external-closure.yml'
+  pull_request:
+    paths:
+      - 'experiments/orga-os-v19/**'
+      - '.github/workflows/orga-os-v19-external-closure.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  closure:
+    name: V19 / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    env:
+      ROOT: ${{ runner.temp }}/v19/orga-os-v19
+      TLA_RELEASE: v1.8.0
+      TLA_SHA1: 742aaa175541332011ff63c0246d5d759d30a620
+      QEMU_COMMIT: e545d8bb9d63e9dd61542b88463183314cff9482
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Materialize frozen V19 source bundle
+        run: |
+          mkdir -p "$RUNNER_TEMP/v19"
+          echo "$(cat experiments/orga-os-v19/bundle.sha256)  experiments/orga-os-v19/bundle.tar.gz" | sha256sum -c -
+          tar -xzf experiments/orga-os-v19/bundle.tar.gz -C "$RUNNER_TEMP/v19"
+          test -x "$ROOT/formal/run_tlc_gate_v19.sh"
+          test -x "$ROOT/qemu/run_qemu_gate_v19.sh"
+
+      - name: Install pinned build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential git ninja-build meson pkg-config python3 \
+            curl ca-certificates openjdk-17-jre-headless \
+            libglib2.0-dev libpixman-1-dev libfdt-dev zlib1g-dev \
+            libslirp-dev libcap-ng-dev libattr1-dev libaio-dev liburing-dev
+
+      - name: Acquire and verify TLC
+        run: |
+          mkdir -p "$ROOT/artifacts"
+          curl --fail --location --retry 5 \
+            "https://github.com/tlaplus/tlaplus/releases/download/${TLA_RELEASE}/tla2tools.jar" \
+            --output "$RUNNER_TEMP/tla2tools.jar"
+          echo "${TLA_SHA1}  $RUNNER_TEMP/tla2tools.jar" | sha1sum -c -
+          sha256sum "$RUNNER_TEMP/tla2tools.jar" | tee "$ROOT/artifacts/tla2tools.sha256"
+
+      - name: Execute TLC fixed, rotation, and mutant gates
+        env:
+          TLA2TOOLS_JAR: ${{ runner.temp }}/tla2tools.jar
+        run: |
+          "$ROOT/formal/run_tlc_gate_v19.sh" "$ROOT/artifacts/tlc-${{ matrix.os }}"
+
+      - name: Fetch pinned QEMU 11.0.2
+        run: |
+          git clone --depth 1 --branch v11.0.2 https://github.com/qemu/qemu.git "$RUNNER_TEMP/qemu-src"
+          test "$(git -C "$RUNNER_TEMP/qemu-src" rev-parse HEAD)" = "$QEMU_COMMIT"
+
+      - name: Build QEMU device and execute AERA plus IOMMU QTests
+        env:
+          QEMU_SRC: ${{ runner.temp }}/qemu-src
+          QEMU_BUILD_DIR: ${{ runner.temp }}/qemu-src/build-aera-v19
+        run: |
+          "$ROOT/qemu/run_qemu_gate_v19.sh" "$ROOT/artifacts/qemu-${{ matrix.os }}"
+
+      - name: Freeze runner environment and source hashes
+        if: always()
+        run: |
+          mkdir -p "$ROOT/artifacts/runner-${{ matrix.os }}"
+          {
+            echo "runner_os=${{ matrix.os }}"
+            uname -a
+            gcc --version | head -1
+            python3 --version
+            meson --version || true
+            ninja --version || true
+            java -version 2>&1 | head -3 || true
+          } > "$ROOT/artifacts/runner-${{ matrix.os }}/environment.txt"
+          find "$ROOT" -type f -not -path '*/artifacts/*' -print0 | sort -z | \
+            xargs -0 sha256sum > "$ROOT/artifacts/runner-${{ matrix.os }}/source.sha256"
+
+      - name: Upload external-closure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: orga-os-v19-${{ matrix.os }}
+          path: ${{ env.ROOT }}/artifacts/
+          if-no-files-found: error
+          retention-days: 30
