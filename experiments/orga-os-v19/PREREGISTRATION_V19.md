@@ -1,7 +1,7 @@
 # Pré-enregistrement V19
 
 - Objet : fermeture externe d'AERA V18, sans nouveau benchmark favorable.
-- TLC : v1.8.0, SHA-1 officiel `ae09269f0f74b9a7f69ac8b1e79f1514328082c6`.
+- TLC : v1.8.0, SHA-1 officiel `742aaa175541332011ff63c0246d5d759d30a620`.
 - QEMU : tag `v11.0.2`, commit `e545d8bb9d63e9dd61542b88463183314cff9482`.
 - Runners : Ubuntu 22.04 et Ubuntu 24.04.
 - TLC fixe et rotation : succès obligatoire.
