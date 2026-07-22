@@ -28,7 +28,7 @@ jobs:
     env:
       ROOT: ${{ runner.temp }}/v19/orga-os-v19
       TLA_RELEASE: v1.8.0
-      TLA_SHA1: ae09269f0f74b9a7f69ac8b1e79f1514328082c6
+      TLA_SHA1: 742aaa175541332011ff63c0246d5d759d30a620
       QEMU_COMMIT: e545d8bb9d63e9dd61542b88463183314cff9482
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
